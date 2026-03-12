@@ -1,0 +1,20 @@
+{
+  "name": "oracle-arena",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "start": "cd frontend && npm run start",
+    "lint": "cd frontend && npm run lint",
+    "deploy": "npx genlayer deploy",
+    "deploy:oracle": "npx genlayer deploy --contract contracts/oracle_arena.py"
+  },
+  "devDependencies": {
+    "genlayer": "^0.34.0",
+    "genlayer-js": "^0.18.3"
+  }
+}

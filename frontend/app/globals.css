@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #f1f5f9;
+  --color-foreground: #0f172a;
+  --color-card: #ffffff;
+  --color-card-foreground: #0f172a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0f172a;
+  --color-primary: #ff9146;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #46d4c6;
+  --color-secondary-foreground: #ffffff;
+  --color-muted: #f8fafc;
+  --color-muted-foreground: #64748b;
+  --color-accent: #ff9146;
+  --color-accent-foreground: #ffffff;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #0E1922;
+  --color-input: #f1f5f9;
+  --color-ring: #ff9146;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  
+  html.dark {
+    --color-background: #111827;
+    --color-foreground: #f8fafc;
+    --color-card: #1f2937;
+    --color-card-foreground: #f8fafc;
+    --color-border: #374151;
+    --color-muted: rgba(255, 255, 255, 0.05);
+    --color-muted-foreground: #94a3b8;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-feature-settings: "rlig" 1, "calt" 1;
+    min-height: 100vh;
+    font-family: var(--font-body), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.3s ease;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display), sans-serif;
+  }
+}
+
+@layer components {
+  .studio-panel {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  html.dark .studio-panel {
+    background-color: var(--color-card);
+    border-color: var(--color-border);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+  
+  .mono-text {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  .minimal-table {
+    @apply w-full text-left;
+  }
+
+  .minimal-table th {
+    @apply text-muted-foreground text-[11px] uppercase tracking-[0.2em] font-bold py-3 px-4 border-b border-border;
+  }
+  
+  .minimal-table td {
+    @apply py-4 px-4 border-b border-border text-sm;
+  }
+
+  .nav-tab {
+    @apply px-4 py-2 text-[11px] font-bold uppercase tracking-[0.2em] transition-all rounded-sm;
+  }
+
+  .nav-tab.active {
+    @apply bg-primary/10 text-primary border border-primary/20;
+  }
+
+  /* Animations from generated-page.html */
+  @keyframes animationIn {
+    0% { opacity: 0; transform: translateY(30px); filter: blur(8px); }
+    100% { opacity: 1; transform: translateY(0); filter: blur(0px); }
+  }
+
+  .animate-in {
+    animation: animationIn 0.8s ease-out forwards;
+  }
+}
