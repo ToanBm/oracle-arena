@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 import { RainbowKitProvider, darkTheme, lightTheme } from "@rainbow-me/rainbowkit";
@@ -9,83 +9,70 @@ import { config } from "@/lib/genlayer/wagmi";
 import { Toaster } from "sonner";
 import { WalletProvider } from "@/lib/genlayer/WalletProvider";
 import { ThemeProvider, useTheme } from "next-themes";
-import React, { useEffect } from "react";
+import React from "react";
+import dynamic from "next/dynamic";
+import { Loader2 } from "lucide-react";
 
-function RainbowKitThemeWrapper({ children }: { children: React.ReactNode }) {
+// This component isolates all Wagmi/RainbowKit logic and ONLY renders on the client
+const BlockchainProvider = ({ children }: { children: React.ReactNode }) => {
   const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
-  useEffect(() => setMounted(true), []);
-
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
-  return (
-    <RainbowKitProvider 
-      theme={resolvedTheme === "dark" ? darkTheme() : lightTheme()}
-      modalSize="compact"
-    >
-      {children}
-    </RainbowKitProvider>
-  );
-}
-
-export function Providers({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
+  
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 2000,
-            refetchOnWindowFocus: false,
-          },
-        },
-      })
-  );
-
+  // IMPORTANT: Do NOT render children until mounted to ensure WagmiProvider is active
   if (!mounted) {
     return (
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <WalletProvider>
-            {children}
-          </WalletProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+            CONNECTING_TO_GENLAYER...
+          </p>
+        </div>
+      </div>
     );
   }
 
   return (
     <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <RainbowKitThemeWrapper>
-            <WalletProvider>
-              {children}
-            </WalletProvider>
-            <Toaster
-              position="top-right"
-              theme="system"
-              richColors
-              closeButton
-              offset="80px"
-              toastOptions={{
-                style: {
-                  background: 'var(--color-card)',
-                  border: '1px solid var(--color-border)',
-                  color: 'var(--color-foreground)',
-                  borderRadius: '16px',
-                },
-              }}
-            />
-          </RainbowKitThemeWrapper>
-        </ThemeProvider>
-      </QueryClientProvider>
+      <RainbowKitProvider 
+        theme={resolvedTheme === "dark" ? darkTheme() : lightTheme()}
+        modalSize="compact"
+      >
+        <WalletProvider>
+          {children}
+          <Toaster 
+            position="top-right" 
+            theme="system" 
+            richColors 
+            closeButton 
+            offset="80px" 
+          />
+        </WalletProvider>
+      </RainbowKitProvider>
     </WagmiProvider>
+  );
+};
+
+// Use dynamic with ssr: false to completely bypass server-side rendering for the blockchain stack
+const ClientOnlyBlockchainProvider = dynamic(
+  () => Promise.resolve(BlockchainProvider),
+  { ssr: false }
+);
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  const [queryClient] = useState(() => new QueryClient());
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ClientOnlyBlockchainProvider>
+          {children}
+        </ClientOnlyBlockchainProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }

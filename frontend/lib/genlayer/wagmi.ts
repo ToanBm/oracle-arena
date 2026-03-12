@@ -21,5 +21,5 @@ export const config = getDefaultConfig({
   appName: 'Oracle Arena',
   projectId: 'YOUR_PROJECT_ID', // Replace with your WalletConnect Project ID
   chains: [studionet as any, mainnet],
-  ssr: true,
+  ssr: false, // Disable Wagmi's internal SSR to prevent context errors during hydration
 })

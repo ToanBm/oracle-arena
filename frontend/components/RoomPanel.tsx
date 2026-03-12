@@ -59,7 +59,7 @@ export function RoomPanel() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Create room */}
-          <div className="studio-panel p-8 flex flex-col justify-between space-y-6 bg-white/5 border-[#0E1922]/30 dark:border-white/10 hover:bg-white/10 transition-all">
+          <div className="studio-panel p-6 flex flex-col justify-between space-y-6 bg-white/5 border-[#0E1922]/30 dark:border-white/10 hover:bg-white/10 transition-all">
             <div>
               <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] mb-3 flex items-center gap-2 text-secondary">
                 <Plus className="w-4 h-4" />
@@ -87,7 +87,7 @@ export function RoomPanel() {
           </div>
 
           {/* Join room */}
-          <div className="studio-panel p-8 flex flex-col justify-between space-y-6 bg-white/5 border-[#0E1922]/30 dark:border-white/10 hover:bg-white/10 transition-all">
+          <div className="studio-panel p-6 flex flex-col justify-between space-y-6 bg-white/5 border-[#0E1922]/30 dark:border-white/10 hover:bg-white/10 transition-all">
             <div>
               <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] mb-3 flex items-center gap-2 text-primary">
                 <Hash className="w-4 h-4" />
