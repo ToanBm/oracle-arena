@@ -31,6 +31,11 @@ function RainbowKitThemeWrapper({ children }: { children: React.ReactNode }) {
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -42,6 +47,18 @@ export function Providers({ children }: { children: React.ReactNode }) {
         },
       })
   );
+
+  if (!mounted) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <WalletProvider>
+            {children}
+          </WalletProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    );
+  }
 
   return (
     <WagmiProvider config={config}>

@@ -62,8 +62,8 @@ class MyContract(gl.Contract):
 
 ## Frontend Patterns
 
-- Contract interactions: `frontend/lib/contracts/FootballBets.ts`
-- React hooks: `frontend/lib/hooks/useFootballBets.ts`
+- Contract interactions: `frontend/lib/contracts/OracleArena.ts`
+- React hooks: `frontend/lib/hooks/useOracleArena.ts`, `frontend/lib/hooks/usePromptArena.ts`
 - Wallet context: `frontend/lib/genlayer/WalletProvider.tsx`
 - GenLayer client: `frontend/lib/genlayer/client.ts`
 
