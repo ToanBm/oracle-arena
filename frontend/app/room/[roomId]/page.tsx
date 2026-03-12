@@ -23,9 +23,14 @@ import { useWallet } from "@/lib/genlayer/wallet";
 export default function RoomPage() {
   const params = useParams();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const { address, isConnected } = useWallet();
   const roomId = params.roomId ? Number(params.roomId) : null;
-
+  
   const { data: room, isLoading: roomLoading, isError: roomError } = useRoom(roomId);
   const { data: players = [] } = useRoomPlayers(roomId);
   const { data: results = [] } = useRoomResults(roomId);
@@ -46,6 +51,19 @@ export default function RoomPage() {
       finalizeRoom(roomId!);
     }
   }, [room, finalizeRoom, roomId, finalizeCalled]);
+
+  if (!mounted) {
+    return (
+      <PageShell>
+        <div className="flex flex-col items-center justify-center py-24 gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+            INITIALIZING_PROTOCOL...
+          </p>
+        </div>
+      </PageShell>
+    );
+  }
 
   if (roomId === null || isNaN(roomId)) {
     return <ErrorPage message="Invalid room ID." onBack={() => router.push("/")} />;

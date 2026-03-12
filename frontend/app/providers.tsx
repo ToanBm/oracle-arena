@@ -9,9 +9,17 @@ import { config } from "@/lib/genlayer/wagmi";
 import { Toaster } from "sonner";
 import { WalletProvider } from "@/lib/genlayer/WalletProvider";
 import { ThemeProvider, useTheme } from "next-themes";
+import React, { useEffect } from "react";
 
 function RainbowKitThemeWrapper({ children }: { children: React.ReactNode }) {
   const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) {
+    return <>{children}</>;
+  }
+
   return (
     <RainbowKitProvider 
       theme={resolvedTheme === "dark" ? darkTheme() : lightTheme()}

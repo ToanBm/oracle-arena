@@ -136,8 +136,24 @@ function OracleRoomPanel() {
 }
 
 function OracleLeaderboard() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const { data: leaderboard = [] } = useOracleXpLeaderboard();
   const { address } = useWallet();
+
+  if (!mounted) {
+    return (
+      <div className="flex flex-col items-center justify-center py-10 gap-4">
+        <Loader2 className="w-5 h-5 animate-spin text-primary" />
+        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+          SYNCHRONIZING...
+        </p>
+      </div>
+    );
+  }
 
   const getRankIcon = (index: number) => {
     switch (index) {

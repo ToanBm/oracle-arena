@@ -13,8 +13,31 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
+import React, { useEffect, useState } from "react";
 
 export function AccountPanel() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <Button
+        variant="outline"
+        className="h-10 px-6 text-[11px] font-bold uppercase tracking-[0.2em] border-[#0E1922]/30 text-primary opacity-50 rounded-sm"
+        disabled
+      >
+        <Wallet className="w-3.5 h-3.5 mr-2" />
+        CONNECT_NODE
+      </Button>
+    );
+  }
+
+  return <AccountPanelInner />;
+}
+
+function AccountPanelInner() {
   const {
     address,
     isConnected,

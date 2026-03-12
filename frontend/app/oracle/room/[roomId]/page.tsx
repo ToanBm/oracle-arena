@@ -23,9 +23,28 @@ import {
 export default function OracleRoomPage() {
   const params = useParams();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const roomId = params.roomId ? Number(params.roomId) : null;
 
   const { data: room, isLoading: roomLoading, isError: roomError } = useOracleRoom(roomId);
+  // ... rest of hooks ...
+
+  if (!mounted) {
+    return (
+      <PageShell>
+        <div className="flex flex-col items-center justify-center py-24 gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+            INITIALIZING_ORACLE...
+          </p>
+        </div>
+      </PageShell>
+    );
+  }
 
   const effectiveStatus = room?.status ?? 0;
 
