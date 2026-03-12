@@ -10,69 +10,36 @@ import { Toaster } from "sonner";
 import { WalletProvider } from "@/lib/genlayer/WalletProvider";
 import { ThemeProvider, useTheme } from "next-themes";
 import React from "react";
-import dynamic from "next/dynamic";
-import { Loader2 } from "lucide-react";
 
-// This component isolates all Wagmi/RainbowKit logic and ONLY renders on the client
-const BlockchainProvider = ({ children }: { children: React.ReactNode }) => {
-  const { resolvedTheme } = useTheme();
+export function Providers({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
-  
+  const [queryClient] = useState(() => new QueryClient());
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // IMPORTANT: Do NOT render children until mounted to ensure WagmiProvider is active
-  if (!mounted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-            CONNECTING_TO_GENLAYER...
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const { resolvedTheme } = useTheme();
 
   return (
     <WagmiProvider config={config}>
-      <RainbowKitProvider 
-        theme={resolvedTheme === "dark" ? darkTheme() : lightTheme()}
-        modalSize="compact"
-      >
-        <WalletProvider>
-          {children}
-          <Toaster 
-            position="top-right" 
-            theme="system" 
-            richColors 
-            closeButton 
-            offset="80px" 
-          />
-        </WalletProvider>
-      </RainbowKitProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {mounted ? (
+            <RainbowKitProvider 
+              theme={resolvedTheme === "dark" ? darkTheme() : lightTheme()}
+              modalSize="compact"
+            >
+              <WalletProvider>
+                {children}
+                <Toaster position="top-right" theme="system" richColors closeButton offset="80px" />
+              </WalletProvider>
+            </RainbowKitProvider>
+          ) : (
+            <div className="min-h-screen bg-background" />
+          )}
+        </ThemeProvider>
+      </QueryClientProvider>
     </WagmiProvider>
-  );
-};
-
-// Use dynamic with ssr: false to completely bypass server-side rendering for the blockchain stack
-const ClientOnlyBlockchainProvider = dynamic(
-  () => Promise.resolve(BlockchainProvider),
-  { ssr: false }
-);
-
-export function Providers({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <ClientOnlyBlockchainProvider>
-          {children}
-        </ClientOnlyBlockchainProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
   );
 }
