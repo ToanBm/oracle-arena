@@ -10,7 +10,7 @@
     "build": "cd frontend && npm run build",
     "start": "cd frontend && npm run start",
     "lint": "cd frontend && npm run lint",
-    "deploy": "npx genlayer deploy",
+    "deploy": "npx genlayer deploy --contract contracts/prompt_arena.py",
     "deploy:oracle": "npx genlayer deploy --contract contracts/oracle_arena.py"
   },
   "devDependencies": {

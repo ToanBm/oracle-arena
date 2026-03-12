@@ -48,8 +48,9 @@ cd frontend && npm install && cd ..
 npx genlayer network   # choose studionet
 
 # 3. Deploy Both Contracts
-npm run deploy           # Deploys Prompt Gladiator (prompt_arena.py)
-npm run deploy:oracle    # Deploys Oracle Arena (oracle_arena.py)
+# This uses the scripts defined in package.json
+npm run deploy           # Deploys Prompt Gladiator (contracts/prompt_arena.py)
+npm run deploy:oracle    # Deploys Oracle Arena (contracts/oracle_arena.py)
 
 # 4. Initialize Prompt Gladiator (Mandatory for Solo Mode)
 # Replace <PROMPT_CONTRACT_ADDRESS> with the address from step 3

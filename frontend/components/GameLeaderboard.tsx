@@ -5,7 +5,7 @@ import { useXpLeaderboard } from "@/lib/hooks/usePromptArena";
 import { useOracleXpLeaderboard } from "@/lib/hooks/useOracleArena";
 import { useWallet } from "@/lib/genlayer/wallet";
 import { AddressDisplay } from "./AddressDisplay";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 interface GameLeaderboardProps {
   gameType?: "arena" | "trivia" | "all";
@@ -13,6 +13,11 @@ interface GameLeaderboardProps {
 }
 
 export function GameLeaderboard({ gameType = "all", limit = 10 }: GameLeaderboardProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const { address: currentAddress } = useWallet();
   
   const { 
@@ -67,7 +72,7 @@ export function GameLeaderboard({ gameType = "all", limit = 10 }: GameLeaderboar
   const isLoading = gameType === "arena" ? promptLoading : (gameType === "trivia" ? oracleLoading : (promptLoading || oracleLoading));
   const isError = gameType === "arena" ? promptError : (gameType === "trivia" ? oracleError : (promptError || oracleError));
 
-  if (isLoading) {
+  if (!mounted || isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <Loader2 className="w-6 h-6 animate-spin text-primary" />

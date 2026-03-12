@@ -28,6 +28,35 @@ interface WalletContextValue extends WalletState {
 const WalletContext = createContext<WalletContextValue | undefined>(undefined);
 
 export function WalletProvider({ children }: { children: ReactNode }) {
+  // SSR Safety: return a dummy provider if we're on the server or if Wagmi isn't ready
+  // This prevents the "useConfig must be used within WagmiProvider" error during build
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    const dummyState: WalletState = {
+      address: null,
+      chainId: null,
+      isConnected: false,
+      isLoading: false,
+      isMetaMaskInstalled: false,
+      isOnCorrectNetwork: false,
+    };
+    const dummyValue: WalletContextValue = {
+      ...dummyState,
+      connectWallet: async () => "",
+      disconnectWallet: () => {},
+      switchWalletAccount: async () => "",
+    };
+    return <WalletContext.Provider value={dummyValue}>{children}</WalletContext.Provider>;
+  }
+
+  return <WalletProviderInner>{children}</WalletProviderInner>;
+}
+
+function WalletProviderInner({ children }: { children: ReactNode }) {
   const { address, isConnected, chainId, isConnecting } = useAccount();
   const { connectAsync, connectors } = useConnect();
   const { disconnect } = useDisconnect();

@@ -4,15 +4,21 @@ import { GameLeaderboard } from "@/components/GameLeaderboard";
 import { Trophy, Award, Star, TrendingUp, Users } from "lucide-react";
 import { useXpLeaderboard, useRoomCount } from "@/lib/hooks/usePromptArena";
 import { useOracleXpLeaderboard, useOracleRoomCount } from "@/lib/hooks/useOracleArena";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 export default function LeaderboardPage() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const { data: promptLeaderboard = [] } = useXpLeaderboard();
   const { data: oracleLeaderboard = [] } = useOracleXpLeaderboard();
   const { data: promptRoomCount = 0 } = useRoomCount();
   const { data: oracleRoomCount = 0 } = useOracleRoomCount();
 
   const stats = useMemo(() => {
+    if (!mounted) return [];
     const uniquePlayers = new Set([
       ...promptLeaderboard.map(e => (e.address || "").toLowerCase()),
       ...oracleLeaderboard.map(e => (e.address || "").toLowerCase())
@@ -42,13 +48,23 @@ export default function LeaderboardPage() {
       <div className="max-w-4xl mx-auto">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
-          {stats.map((stat, i) => (
-            <div key={i} className="studio-panel p-6 bg-white/5 border-border/30 dark:border-white/10 flex flex-col items-center gap-2">
-              <stat.icon className={`w-5 h-5 ${stat.color}`} />
-              <div className="text-2xl font-bold tracking-tight italic text-foreground">{stat.value}</div>
-              <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{stat.label}</div>
-            </div>
-          ))}
+          {!mounted ? (
+            Array(3).fill(0).map((_, i) => (
+              <div key={i} className="studio-panel p-6 bg-white/5 border-border/30 dark:border-white/10 flex flex-col items-center gap-2 animate-pulse">
+                <div className="w-5 h-5 bg-muted/20 rounded-full" />
+                <div className="h-8 w-16 bg-muted/20 rounded-sm" />
+                <div className="h-3 w-24 bg-muted/20 rounded-sm" />
+              </div>
+            ))
+          ) : (
+            stats.map((stat, i) => (
+              <div key={i} className="studio-panel p-6 bg-white/5 border-border/30 dark:border-white/10 flex flex-col items-center gap-2">
+                <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                <div className="text-2xl font-bold tracking-tight italic text-foreground">{stat.value}</div>
+                <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{stat.label}</div>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Main Leaderboard */}
