@@ -10,7 +10,7 @@ import {
 import { studionet } from "./wagmi";
 import { error, userRejected } from "@/lib/utils/toast";
 
-interface WalletState {
+export interface WalletState {
   address: string | null;
   chainId: string | null;
   isConnected: boolean;
@@ -19,7 +19,7 @@ interface WalletState {
   isOnCorrectNetwork: boolean;
 }
 
-interface WalletContextValue extends WalletState {
+export interface WalletContextValue extends WalletState {
   connectWallet: () => Promise<string>;
   disconnectWallet: () => void;
   switchWalletAccount: () => Promise<string>;
