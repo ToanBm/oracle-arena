@@ -136,24 +136,8 @@ function OracleRoomPanel() {
 }
 
 function OracleLeaderboard() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   const { data: leaderboard = [] } = useOracleXpLeaderboard();
   const { address } = useWallet();
-
-  if (!mounted) {
-    return (
-      <div className="flex flex-col items-center justify-center py-10 gap-4">
-        <Loader2 className="w-5 h-5 animate-spin text-primary" />
-        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
-          SYNCHRONIZING...
-        </p>
-      </div>
-    );
-  }
 
   const getRankIcon = (index: number) => {
     switch (index) {
@@ -259,7 +243,7 @@ export default function OraclePage() {
                   color: "text-secondary"
                 },
               ].map(({ step, desc, icon: Icon, color }) => (
-                <div key={step} className="studio-panel p-6 space-y-4 hover:bg-white/5 transition-all bg-white/5 border-border/30 dark:border-white/10">
+                <div key={step} className="studio-panel p-8 space-y-4 hover:bg-white/5 transition-all bg-white/5 border-border/30 dark:border-white/10">
                   <div className={`${color} font-bold uppercase tracking-[0.2em] text-[11px] flex items-center gap-2`}>
                     <Icon className="w-3.5 h-3.5" />
                     {step}

@@ -1,7 +1,9 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit'
 import { mainnet } from 'wagmi/chains'
 import { defineChain } from 'viem'
+import { cookieStorage, createStorage } from 'wagmi'
 
+// Define GenLayer Studionet chain
 export const studionet = defineChain({
   id: 61999,
   name: 'GenLayer Studio',
@@ -18,7 +20,10 @@ export const studionet = defineChain({
 
 export const config = getDefaultConfig({
   appName: 'Oracle Arena',
-  projectId: 'YOUR_PROJECT_ID',
+  projectId: 'YOUR_PROJECT_ID', // Replace with your WalletConnect Project ID
   chains: [studionet as any, mainnet],
-  ssr: false, // TẮT SSR để tránh xung đột context khi hydration
+  storage: createStorage({
+    storage: cookieStorage,
+  }),
+  ssr: true,
 })

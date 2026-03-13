@@ -5,21 +5,12 @@ import { useXpLeaderboard } from "@/lib/hooks/usePromptArena";
 import { useOracleXpLeaderboard } from "@/lib/hooks/useOracleArena";
 import { useWallet } from "@/lib/genlayer/wallet";
 import { AddressDisplay } from "./AddressDisplay";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo } from "react";
 
-interface GameLeaderboardProps {
-  gameType?: "arena" | "trivia" | "all";
-  limit?: number;
-}
-
-export function GameLeaderboard({ gameType = "all", limit = 10 }: GameLeaderboardProps) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
+export function GameLeaderboard() {
   const { address: currentAddress } = useWallet();
   
+  // Fetch from both sources
   const { 
     data: promptEntries = [], 
     isLoading: promptLoading, 
@@ -32,9 +23,11 @@ export function GameLeaderboard({ gameType = "all", limit = 10 }: GameLeaderboar
     isError: oracleError 
   } = useOracleXpLeaderboard();
 
+  // Merge and sort logic
   const mergedEntries = useMemo(() => {
     const registry: Record<string, { address: string; promptXp: number; oracleXp: number; totalXp: number }> = {};
 
+    // Process Prompt Arena XP
     promptEntries.forEach(entry => {
       const addr = entry.address.toLowerCase();
       if (!registry[addr]) {
@@ -43,6 +36,7 @@ export function GameLeaderboard({ gameType = "all", limit = 10 }: GameLeaderboar
       registry[addr].promptXp += Number(entry.xp || 0);
     });
 
+    // Process Oracle Arena XP
     oracleEntries.forEach(entry => {
       const addr = (entry.address || "").toLowerCase();
       if (!addr) return;
@@ -52,32 +46,24 @@ export function GameLeaderboard({ gameType = "all", limit = 10 }: GameLeaderboar
       registry[addr].oracleXp += Number(entry.xp || 0);
     });
 
+    // Calculate totals and convert to array
     return Object.values(registry)
       .map(item => ({
         ...item,
         totalXp: item.promptXp + item.oracleXp
       }))
-      .filter(item => {
-        if (gameType === "arena") return item.promptXp > 0;
-        if (gameType === "trivia") return item.oracleXp > 0;
-        return item.totalXp > 0;
-      })
-      .sort((a, b) => {
-        if (gameType === "arena") return b.promptXp - a.promptXp;
-        if (gameType === "trivia") return b.oracleXp - a.oracleXp;
-        return b.totalXp - a.totalXp;
-      });
-  }, [promptEntries, oracleEntries, gameType]);
+      .sort((a, b) => b.totalXp - a.totalXp);
+  }, [promptEntries, oracleEntries]);
 
-  const isLoading = gameType === "arena" ? promptLoading : (gameType === "trivia" ? oracleLoading : (promptLoading || oracleLoading));
-  const isError = gameType === "arena" ? promptError : (gameType === "trivia" ? oracleError : (promptError || oracleError));
+  const isLoading = promptLoading || oracleLoading;
+  const isError = promptError || oracleError;
 
-  if (!mounted || isLoading) {
+  if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <Loader2 className="w-6 h-6 animate-spin text-primary" />
         <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
-          SYNCHRONIZING_LEDGER...
+          SYNCHRONIZING_GLOBAL_LEDGER...
         </p>
       </div>
     );
@@ -99,13 +85,12 @@ export function GameLeaderboard({ gameType = "all", limit = 10 }: GameLeaderboar
       {mergedEntries.length === 0 ? (
         <div className="py-20 text-center">
           <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.2em] italic">
-            NO_DATA_FOUND
+            NO_SYNCHRONIZATION_DATA_FOUND
           </p>
         </div>
       ) : (
-        mergedEntries.slice(0, limit).map((entry, i) => {
+        mergedEntries.slice(0, 10).map((entry, i) => {
           const isMe = entry.address.toLowerCase() === currentAddress?.toLowerCase();
-          const displayXp = gameType === "arena" ? entry.promptXp : (gameType === "trivia" ? entry.oracleXp : entry.totalXp);
           
           const getRankDisplay = (index: number) => {
             switch (index) {
@@ -137,29 +122,27 @@ export function GameLeaderboard({ gameType = "all", limit = 10 }: GameLeaderboar
                 </div>
                 <div className="flex flex-col min-w-0">
                   <AddressDisplay address={entry.address} maxLength={14} className={`text-sm mono-text truncate ${isMe ? "font-bold text-primary" : "text-foreground"}`} showCopy={false} />
-                  {gameType === "all" && (
-                    <div className="flex items-center gap-3 mt-0.5">
-                      {entry.promptXp > 0 && (
-                        <div className="flex items-center gap-1 opacity-60">
-                          <Swords className="w-2.5 h-2.5 text-secondary" />
-                          <span className="text-[9px] font-bold text-muted-foreground">{entry.promptXp}</span>
-                        </div>
-                      )}
-                      {entry.oracleXp > 0 && (
-                        <div className="flex items-center gap-1 opacity-60">
-                          <Terminal className="w-2.5 h-2.5 text-primary" />
-                          <span className="text-[9px] font-bold text-muted-foreground">{entry.oracleXp}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  <div className="flex items-center gap-3 mt-0.5">
+                    {entry.promptXp > 0 && (
+                      <div className="flex items-center gap-1 opacity-60">
+                        <Swords className="w-2.5 h-2.5 text-secondary" />
+                        <span className="text-[9px] font-bold text-muted-foreground">{entry.promptXp}</span>
+                      </div>
+                    )}
+                    {entry.oracleXp > 0 && (
+                      <div className="flex items-center gap-1 opacity-60">
+                        <Terminal className="w-2.5 h-2.5 text-primary" />
+                        <span className="text-[9px] font-bold text-muted-foreground">{entry.oracleXp}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
               <div className="text-right shrink-0">
                 <div className="flex items-center gap-1.5 justify-end">
                    <span className={`text-base font-black italic tracking-tighter ${i < 3 ? "text-foreground" : "text-muted-foreground"}`}>
-                     {displayXp}
+                     {entry.totalXp}
                    </span>
                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">XP</span>
                 </div>

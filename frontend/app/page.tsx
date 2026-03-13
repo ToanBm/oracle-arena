@@ -57,7 +57,7 @@ export default function HomePage() {
                   color: "text-secondary"
                 },
               ].map(({ step, desc, icon: Icon, color }) => (
-                <div key={step} className="studio-panel p-6 space-y-4 hover:bg-white/5 transition-all bg-white/5 border-border/30 dark:border-white/10">
+                <div key={step} className="studio-panel p-8 space-y-4 hover:bg-white/5 transition-all bg-white/5 border-border/30 dark:border-white/10">
                   <div className={`${color} font-bold uppercase tracking-[0.2em] text-[11px] flex items-center gap-2`}>
                     <Icon className="w-3.5 h-3.5" />
                     {step}
@@ -78,8 +78,9 @@ export default function HomePage() {
               <h2 className="text-xl font-medium tracking-tight italic">Top Operatives</h2>
             </div>
             <div className="studio-panel overflow-hidden border-border/30 dark:border-white/20">
-              <GameLeaderboard gameType="arena" />
-            </div>          </section>
+              <GameLeaderboard />
+            </div>
+          </section>
         </div>
       </div>
     </div>

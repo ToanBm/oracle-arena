@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, ReactNode, useMemo, useState, useEffect } from "react";
+import React, { createContext, useContext, ReactNode, useMemo } from "react";
 import { 
   useAccount, 
   useConnect, 
@@ -8,7 +8,7 @@ import {
   useSwitchChain
 } from "wagmi";
 import { studionet } from "./wagmi";
-import { error, userRejected } from "@/lib/utils/toast";
+import { error, userRejected } from "../utils/toast";
 
 export interface WalletState {
   address: string | null;
@@ -19,7 +19,7 @@ export interface WalletState {
   isOnCorrectNetwork: boolean;
 }
 
-export interface WalletContextValue extends WalletState {
+interface WalletContextValue extends WalletState {
   connectWallet: () => Promise<string>;
   disconnectWallet: () => void;
   switchWalletAccount: () => Promise<string>;
@@ -28,37 +28,6 @@ export interface WalletContextValue extends WalletState {
 const WalletContext = createContext<WalletContextValue | undefined>(undefined);
 
 export function WalletProvider({ children }: { children: ReactNode }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    const dummyState: WalletState = {
-      address: null,
-      chainId: null,
-      isConnected: false,
-      isLoading: false,
-      isMetaMaskInstalled: false,
-      isOnCorrectNetwork: false,
-    };
-    const dummyValue: WalletContextValue = {
-      ...dummyState,
-      connectWallet: async () => "",
-      disconnectWallet: () => {},
-      switchWalletAccount: async () => "",
-    };
-    return (
-      <WalletContext.Provider value={dummyValue}>
-        {children}
-      </WalletContext.Provider>
-    );
-  }
-
-  return <WalletProviderInner>{children}</WalletProviderInner>;
-}
-
-function WalletProviderInner({ children }: { children: ReactNode }) {
   const { address, isConnected, chainId, isConnecting } = useAccount();
   const { connectAsync, connectors } = useConnect();
   const { disconnect } = useDisconnect();
@@ -68,7 +37,9 @@ function WalletProviderInner({ children }: { children: ReactNode }) {
     try {
       const connector = connectors.find(c => c.id === 'injected') || connectors[0];
       if (!connector) throw new Error("No wallet connector found");
+      
       const result = await connectAsync({ connector, chainId: studionet.id });
+      
       if (result.chainId !== studionet.id) {
         try {
           await switchChainAsync({ chainId: studionet.id });
@@ -76,6 +47,7 @@ function WalletProviderInner({ children }: { children: ReactNode }) {
           console.error("Failed to switch to Studionet:", e);
         }
       }
+      
       return result.accounts[0];
     } catch (err: any) {
       if (err.message?.includes("rejected")) {
@@ -87,6 +59,14 @@ function WalletProviderInner({ children }: { children: ReactNode }) {
     }
   };
 
+  const disconnectWallet = () => {
+    disconnect();
+  };
+
+  const switchWalletAccount = async () => {
+    return connectWallet();
+  };
+
   const state: WalletState = useMemo(() => ({
     address: address || null,
     chainId: chainId ? `0x${chainId.toString(16)}` : null,
@@ -96,11 +76,11 @@ function WalletProviderInner({ children }: { children: ReactNode }) {
     isOnCorrectNetwork: chainId === studionet.id,
   }), [address, isConnected, chainId, isConnecting]);
 
-  const value = {
+  const value: WalletContextValue = {
     ...state,
     connectWallet,
-    disconnectWallet: () => disconnect(),
-    switchWalletAccount: connectWallet,
+    disconnectWallet,
+    switchWalletAccount,
   };
 
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;

@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Navbar } from "@/components/Navbar";
+import { headers } from "next/headers";
 
 // Font for body text and UI (Switzer alternative per brand guidelines)
 const inter = Inter({
@@ -33,15 +34,16 @@ export const viewport: Viewport = {
   themeColor: "#0A0A0A",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookie = (await headers()).get("cookie");
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <body suppressHydrationWarning className="bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary min-h-screen overflow-x-hidden">
-        
+
         {/* Background Effects from generated-page.html */}
         <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
           {/* Glowing Blobs */}
@@ -51,7 +53,7 @@ export default function RootLayout({
           </div>
         </div>
 
-        <Providers>
+        <Providers cookie={cookie}>
           <Navbar />
           <main className="min-h-screen pt-[104px] relative z-10">
             <div className="max-w-[1200px] mx-auto px-6 pb-20">
