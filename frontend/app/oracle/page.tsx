@@ -166,7 +166,7 @@ function OracleLeaderboard() {
                 isMe ? "bg-primary/5" : "hover:bg-white/5"
               }`}
             >
-              <div className="w-6 shrink-0 flex justify-center">
+              <div className="w-8 shrink-0 flex justify-center">
                 {rankIcon ? (
                   rankIcon
                 ) : (
@@ -175,7 +175,7 @@ function OracleLeaderboard() {
                   </span>
                 )}
               </div>
-              <AddressDisplay address={entry.address} maxLength={14} className="text-sm mono-text flex-1" showCopy={false} />
+              <AddressDisplay address={entry.address} maxLength={14} className={`text-sm mono-text flex-1 ${isMe ? "font-bold text-primary" : "text-foreground"}`} showCopy={false} />
               <div className="text-right flex items-center gap-2">
                 <span className={`text-sm font-bold font-mono ${isMe ? "text-primary" : "text-foreground"}`}>{entry.xp}</span>
                 <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-tighter">XP</span>

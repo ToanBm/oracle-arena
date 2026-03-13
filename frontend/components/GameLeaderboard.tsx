@@ -1,13 +1,18 @@
 "use client";
 
-import { Trophy, Loader2, AlertCircle, User, Swords, Terminal, Award, Medal } from "lucide-react";
+import { Trophy, Loader2, AlertCircle, Award, Medal, User, Swords, Terminal } from "lucide-react";
 import { useXpLeaderboard } from "@/lib/hooks/usePromptArena";
 import { useOracleXpLeaderboard } from "@/lib/hooks/useOracleArena";
 import { useWallet } from "@/lib/genlayer/wallet";
 import { AddressDisplay } from "./AddressDisplay";
 import { useMemo } from "react";
 
-export function GameLeaderboard() {
+interface GameLeaderboardProps {
+  mode?: "prompt" | "oracle" | "combined";
+  showIcons?: boolean;
+}
+
+export function GameLeaderboard({ mode = "combined", showIcons = true }: GameLeaderboardProps) {
   const { address: currentAddress } = useWallet();
   
   // Fetch from both sources
@@ -28,42 +33,51 @@ export function GameLeaderboard() {
     const registry: Record<string, { address: string; promptXp: number; oracleXp: number; totalXp: number }> = {};
 
     // Process Prompt Arena XP
-    promptEntries.forEach(entry => {
-      const addr = entry.address.toLowerCase();
-      if (!registry[addr]) {
-        registry[addr] = { address: entry.address, promptXp: 0, oracleXp: 0, totalXp: 0 };
-      }
-      registry[addr].promptXp += Number(entry.xp || 0);
-    });
+    if (mode === "prompt" || mode === "combined") {
+      promptEntries.forEach(entry => {
+        const addr = entry.address.toLowerCase();
+        if (!registry[addr]) {
+          registry[addr] = { address: entry.address, promptXp: 0, oracleXp: 0, totalXp: 0 };
+        }
+        registry[addr].promptXp += Number(entry.xp || 0);
+      });
+    }
 
     // Process Oracle Arena XP
-    oracleEntries.forEach(entry => {
-      const addr = (entry.address || "").toLowerCase();
-      if (!addr) return;
-      if (!registry[addr]) {
-        registry[addr] = { address: entry.address, promptXp: 0, oracleXp: 0, totalXp: 0 };
-      }
-      registry[addr].oracleXp += Number(entry.xp || 0);
-    });
+    if (mode === "oracle" || mode === "combined") {
+      oracleEntries.forEach(entry => {
+        const addr = (entry.address || "").toLowerCase();
+        if (!addr) return;
+        if (!registry[addr]) {
+          registry[addr] = { address: entry.address, promptXp: 0, oracleXp: 0, totalXp: 0 };
+        }
+        registry[addr].oracleXp += Number(entry.xp || 0);
+      });
+    }
 
     // Calculate totals and convert to array
     return Object.values(registry)
       .map(item => ({
         ...item,
-        totalXp: item.promptXp + item.oracleXp
+        totalXp: mode === "prompt" ? item.promptXp : mode === "oracle" ? item.oracleXp : item.promptXp + item.oracleXp
       }))
+      .filter(item => item.totalXp > 0)
       .sort((a, b) => b.totalXp - a.totalXp);
-  }, [promptEntries, oracleEntries]);
+  }, [promptEntries, oracleEntries, mode]);
 
-  const isLoading = promptLoading || oracleLoading;
-  const isError = promptError || oracleError;
+  const isLoading = (mode === "prompt" && promptLoading) || 
+                  (mode === "oracle" && oracleLoading) || 
+                  (mode === "combined" && (promptLoading || oracleLoading));
+  const isError = (mode === "prompt" && promptError) || 
+                (mode === "oracle" && oracleError) || 
+                (mode === "combined" && (promptError || oracleError));
 
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <Loader2 className="w-6 h-6 animate-spin text-primary" />
         <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
-          SYNCHRONIZING_GLOBAL_LEDGER...
+          SYNCHRONIZING_LEADERBOARD...
         </p>
       </div>
     );
@@ -108,44 +122,48 @@ export function GameLeaderboard() {
           return (
             <div
               key={entry.address}
-              className={`flex items-center gap-4 p-4 transition-colors ${
-                isMe ? "bg-primary/5" : "hover:bg-muted/30"
+              className={`flex items-center gap-4 p-3 transition-all ${
+                isMe ? "bg-primary/5" : "hover:bg-white/5"
               }`}
             >
-              <div className="w-8 shrink-0 flex items-center justify-center">
+              <div className="w-8 shrink-0 flex justify-center">
                 {getRankDisplay(i)}
               </div>
               
               <div className="flex-grow flex items-center gap-3 min-w-0">
-                <div className={`w-9 h-9 rounded-sm flex items-center justify-center shrink-0 border ${isMe ? "bg-primary/10 border-primary/30" : "bg-muted/5 border-border/50"}`}>
-                  <User className={`w-4 h-4 ${isMe ? "text-primary" : "text-muted-foreground"}`} />
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <AddressDisplay address={entry.address} maxLength={14} className={`text-sm mono-text truncate ${isMe ? "font-bold text-primary" : "text-foreground"}`} showCopy={false} />
-                  <div className="flex items-center gap-3 mt-0.5">
-                    {entry.promptXp > 0 && (
-                      <div className="flex items-center gap-1 opacity-60">
-                        <Swords className="w-2.5 h-2.5 text-secondary" />
-                        <span className="text-[9px] font-bold text-muted-foreground">{entry.promptXp}</span>
-                      </div>
-                    )}
-                    {entry.oracleXp > 0 && (
-                      <div className="flex items-center gap-1 opacity-60">
-                        <Terminal className="w-2.5 h-2.5 text-primary" />
-                        <span className="text-[9px] font-bold text-muted-foreground">{entry.oracleXp}</span>
-                      </div>
-                    )}
+                {showIcons && (
+                  <div className={`w-9 h-9 rounded-sm flex items-center justify-center shrink-0 border ${isMe ? "bg-primary/10 border-primary/30" : "bg-muted/5 border-border/50"}`}>
+                    <User className={`w-4 h-4 ${isMe ? "text-primary" : "text-muted-foreground"}`} />
                   </div>
+                )}
+                <div className="flex flex-col min-w-0 flex-1">
+                  <AddressDisplay address={entry.address} maxLength={14} className={`text-sm mono-text truncate ${isMe ? "font-bold text-primary" : "text-foreground"}`} showCopy={false} />
+                  {showIcons && (
+                    <div className="flex items-center gap-3 mt-0.5">
+                      {entry.promptXp > 0 && (mode === "prompt" || mode === "combined") && (
+                        <div className="flex items-center gap-1 opacity-60">
+                          <Swords className="w-2.5 h-2.5 text-secondary" />
+                          <span className="text-[9px] font-bold text-muted-foreground">{entry.promptXp}</span>
+                        </div>
+                      )}
+                      {entry.oracleXp > 0 && (mode === "oracle" || mode === "combined") && (
+                        <div className="flex items-center gap-1 opacity-60">
+                          <Terminal className="w-2.5 h-2.5 text-primary" />
+                          <span className="text-[9px] font-bold text-muted-foreground">{entry.oracleXp}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="text-right shrink-0">
-                <div className="flex items-center gap-1.5 justify-end">
-                   <span className={`text-base font-black italic tracking-tighter ${i < 3 ? "text-foreground" : "text-muted-foreground"}`}>
-                     {entry.totalXp}
-                   </span>
-                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">XP</span>
-                </div>
+              <div className="text-right flex items-center gap-2">
+                <span className={`text-sm font-bold font-mono ${isMe ? "text-primary" : "text-foreground"}`}>
+                  {entry.totalXp}
+                </span>
+                <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-tighter">
+                  XP
+                </span>
               </div>
             </div>
           );

@@ -78,7 +78,7 @@ export default function HomePage() {
               <h2 className="text-xl font-medium tracking-tight italic">Top Operatives</h2>
             </div>
             <div className="studio-panel overflow-hidden border-border/30 dark:border-white/20">
-              <GameLeaderboard />
+              <GameLeaderboard mode="prompt" showIcons={false} />
             </div>
           </section>
         </div>

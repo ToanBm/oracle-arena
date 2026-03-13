@@ -2,7 +2,7 @@
 
 import { User, LogOut, Wallet, Activity, ShieldCheck, ChevronDown } from "lucide-react";
 import { useWallet } from "@/lib/genlayer/wallet";
-import { usePlayerPoints } from "@/lib/hooks/usePromptArena";
+import { usePlayerXp } from "@/lib/hooks/usePromptArena";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -18,7 +18,7 @@ const STUDIONET_HEX = "0xF22F";
 
 export function AccountPanel() {
   const { address, isConnected, isOnCorrectNetwork, chainId, connectWallet, disconnectWallet, isLoading } = useWallet();
-  const { data: points = 0 } = usePlayerPoints(address);
+  const { data: xp = 0 } = usePlayerXp(address);
 
   if (!isConnected || !address) {
     return (
@@ -68,7 +68,7 @@ export function AccountPanel() {
             </div>
             <div className="h-4 w-px bg-border" />
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold mono-text text-foreground">{points}</span>
+              <span className="text-sm font-bold mono-text text-foreground">{xp}</span>
               <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">XP</span>
             </div>
           </div>
@@ -100,7 +100,7 @@ export function AccountPanel() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-5 rounded-md border border-border bg-muted/5 space-y-1.5">
                   <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.2em] opacity-60">CUMULATIVE_XP</p>
-                  <p className="text-3xl font-black italic tracking-tighter text-foreground">{points}</p>
+                  <p className="text-3xl font-black italic tracking-tighter text-foreground">{xp}</p>
                 </div>
                 <div className="p-5 rounded-md border border-border bg-muted/5 space-y-1.5">
                   <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.2em] opacity-60">NODE_STATUS</p>

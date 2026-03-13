@@ -240,7 +240,9 @@ class PromptArena(gl.Contract):
         self.feedback.get_or_insert_default(sender)[challenge_id] = str(result.get("reasoning", ""))
 
         if success:
-            self.points[sender] = self.points.get(sender, u256(0)) + challenge.difficulty
+            diff = challenge.difficulty
+            self.points[sender] = self.points.get(sender, u256(0)) + diff
+            self.xp[sender] = self.xp.get(sender, u256(0)) + diff
 
     @gl.public.write
     def finalize_room(self, room_id: u256):

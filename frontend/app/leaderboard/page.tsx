@@ -64,7 +64,7 @@ export default function LeaderboardPage() {
           </div>
           
           <div className="studio-panel overflow-hidden border-border/30 dark:border-white/20 bg-white/5">
-            <GameLeaderboard />
+            <GameLeaderboard mode="combined" />
           </div>
         </section>
       </div>
